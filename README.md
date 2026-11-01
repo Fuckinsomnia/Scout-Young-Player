@@ -21,7 +21,7 @@ Batas soal adalah 200–2.000 baris, jadi dataset dipotong dengan filter:
 - Baris **tanpa Club** dikeluarkan (penanganan sel kosong)
 - Baris dengan Age/Potential yang bukan angka dilewati dengan `try/except`
 
-Hasilnya disimpan ke **`data/fifa19_young.csv`** (1.988 baris, UTF-8) dengan hanya 13 kolom yang dipakai program:
+Hasilnya disimpan ke **`fifa19_young.csv`** (1.988 baris, UTF-8, sefolder dengan `main.py`) dengan hanya 13 kolom yang dipakai program:
 
 | Kelompok | Kolom |
 |---|---|
@@ -39,7 +39,11 @@ Saat program berjalan, `load_dataset()` memvalidasi setiap baris lewat `is_valid
 - Kolom wajib (`Name`, `Age`, `Club`, `Position`, `Overall`, `Potential`) harus terisi
 - `Age`, `Overall`, `Potential` harus angka yang valid
 
-Baris yang rusak **dilewati tanpa membuat program crash** dan jumlahnya dihitung (1.983 pemain berhasil dimuat, 5 baris dilewati).
+Baris yang rusak **dilewati tanpa membuat program crash** dan jumlahnya dihitung, lalu dilaporkan saat program mulai: **1.983 pemain berhasil dimuat, 5 baris dilewati**.
+
+### Penanganan kolom dengan sel kosong
+
+Kolom `Release Clause` kosong pada 270 baris yang tetap dimuat — pemain seperti itu ditampilkan dengan nilai `€0` (default di `data.py`). Kolom lain yang kosong (Position, Vision, Reactions, Preferred Foot) hanya ada di 5 baris rusak yang memang di-skip loader. Kolom `Value`, `Wage`, `Name`, `Age`, `Club`, `Overall`, `Potential` terisi lengkap di semua baris.
 
 ---
 
@@ -48,10 +52,11 @@ Baris yang rusak **dilewati tanpa membuat program crash** dan jumlahnya dihitung
 ```text
 Scout Player/
 ├── main.py                  # Entry point: menu utama CLI
+├── fifa19_young.csv         # Dataset hasil trim (UTF-8, 13 kolom)
+├── test_project.py          # Runner seluruh unit test
 ├── trim_dataset.py          # Script pemotong dataset (dijalankan sekali)
 ├── data/
-│   ├── fifa19.csv           # Dataset asli dari Kaggle (cp1252)
-│   └── fifa19_young.csv     # Dataset hasil trim (UTF-8, 13 kolom)
+│   └── fifa19.csv           # Dataset asli dari Kaggle (cp1252, sumber trim)
 └── pythonapp/
     ├── clean_text.py        # Util teks: normalisasi nama, parse/format uang, input angka
     ├── data.py              # Class Player, ScoutDatabase, loader CSV + validasi baris
@@ -61,8 +66,7 @@ Scout Player/
     └── tests/
         ├── test_clean_text.py
         ├── test_data.py
-        ├── test_fitur.py
-        └── test_project.py  # Runner seluruh unit test
+        └── test_fitur.py
 ```
 
 ---
@@ -75,8 +79,9 @@ Jalankan dari folder root proyek (`Scout Player/`):
 # Menjalankan program utama
 python main.py
 
-# Menjalankan seluruh unit test (19 test)
-python pythonapp/tests/test_project.py
+# Menjalankan seluruh unit test (19 test) — dua cara sama-sama bisa
+python test_project.py
+python -m unittest
 
 # (Sekali saja) memotong dataset asli menjadi fifa19_young.csv
 python trim_dataset.py
@@ -94,6 +99,7 @@ MENU UTAMA:
   1. Cari Berdasarkan Nama
   2. Filter Pemain (Umur, Rating, Posisi, Gaji)
   3. Komparasi pemain yg di pilih
+  4. Hapus Pemain dari Slot Komparasi
   0. Keluar
 ```
 
@@ -102,6 +108,8 @@ MENU UTAMA:
 **2. Filter Pemain** — menyaring pemain dengan **semua kriteria sekaligus**: umur (15–21), overall minimal, potensi maksimal, posisi (kode `ST`/`CB`/`GK` atau grup `FWD`/`MID`/`DEF`/`GK`), dan budget gaji mingguan (€1K–€155K, sesuai gaji pemain termurah–termahal di data). Ketik **0 atau Enter** pada kriteria mana pun untuk melewatinya. Hasil diurutkan dari potensi tertinggi dengan Selection Sort manual.
 
 **3. Komparasi Pemain Terpilih** — menampilkan tabel semua pemain yang sudah di-select di slot komparasi secara berdampingan (Usia, Posisi, Overall, Potensi, Gaji, Value). Slot bisa menampung berapa saja pemain, minimal 2 untuk bisa dibandingkan.
+
+**4. Hapus Pemain dari Slot Komparasi** — mengeluarkan satu pemain dari slot komparasi (misalnya yang tidak jadi dibandingkan), lengkap dengan konfirmasi nomor dan batal (0).
 
 ### Menu Pemain Terpilih (muncul setelah memilih nomor pemain dari hasil pencarian/filter)
 
@@ -114,7 +122,7 @@ Pilihan Menu:
 ```
 
 - **Select untuk komparasi** — menyimpan pemain ke slot komparasi (nama yang sama tidak bisa dimasukkan dua kali)
-- **Lihat profil lengkap** — identitas, rating, pertumbuhan (Potential − Overall), nilai finansial, dan 3 atribut inti dalam format list
+- **Lihat profil lengkap** — identitas, rating, dua nilai turunan (pertumbuhan `Potential − Overall` dan gaji tahunan `Wage × 52`), nilai finansial, dan 3 atribut inti dalam format list
 
 Semua input angka divalidasi dengan loop (input salah akan diminta ulang, program tidak pernah crash).
 
@@ -126,7 +134,7 @@ Semua input angka divalidasi dengan loop (input salah akan diminta ulang, progra
 |---|---|---|
 | 1. Variables & Constants | `pythonapp/clean_text.py` | `CURRENCY_SYMBOL`, `MILLION_MULTIPLIER`, `THOUSAND_MULTIPLIER`; `DEFAULT_CSV_FILE`, `REQUIRED_FIELDS`, `POSITION_GROUPS` di `data.py` |
 | 2. Data Types | `pythonapp/data.py` | `Player.__init__` — konversi `str → int` (Age, Overall) dan `str → float` (`parse_currency`) |
-| 3. Operators | `pythonapp/data.py`, `pythonapp/filter_pemain.py` | Aritmatika `growth = potential - overall`; operator perbandingan dan logika `and` di `filter_combined` |
+| 3. Operators | `pythonapp/data.py`, `pythonapp/filter_pemain.py` | Dua nilai turunan: `growth = potential - overall` dan `yearly_wage = wage_num * 52`; operator perbandingan dan logika `and` di `filter_combined` |
 | 4. Conditional Statements | `pythonapp/clean_text.py` | `parse_currency` (if/elif/else untuk suffix K/M); `is_valid_row` di `data.py` |
 | 5. Loops | `pythonapp/filter_pemain.py`, `pythonapp/data.py` | `manual_sort` (nested `for`, Selection Sort); loop `while` menu utama di `main.py`; `for` pembaca CSV |
 | 6. Functions | semua modul | parameter opsional dengan nilai default, mis. `filter_combined(players, min_age=None, ...)` |
@@ -154,7 +162,6 @@ Konsep **string manipulation** juga terpakai di `clean_text` (`.strip()`, `.lowe
 - Dataset dipotong hanya ke pemain muda (umur ≤ 21, Potential ≥ 75), jadi tidak bisa mencari pemain senior.
 - Filter hanya mendukung 13 kolom yang disimpan; atribut teknis lain (Finishing, Dribbling, dll.) tidak tersedia.
 - Angka batas filter (umur 15–21, OVR 40–90, POT 75–95, gaji €1K–€155K) diambil dari rentang data aktual; memasukkan angka di luar rentang itu akan ditolak.
-- Pemain yang sudah masuk slot komparasi tidak bisa dikeluarkan satu per satu — slot dikosongkan dengan me-restart program.
 - Tabel komparasi memotong nama pemain 16 karakter agar tetap muat di layar terminal.
 
 ---

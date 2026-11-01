@@ -7,9 +7,9 @@ from clean_text import parse_currency
 DEFAULT_UNKNOWN_VALUE = "N/A"
 DEFAULT_ENCODING = "utf-8"
 
-# Lokasi dataset dihitung dari lokasi file ini: <root>/data/fifa19_young.csv
-DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
-DEFAULT_CSV_FILE = os.path.join(DATA_DIR, "fifa19_young.csv")
+# Lokasi dataset: sefolder dengan main.py (<root>/fifa19_young.csv)
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DEFAULT_CSV_FILE = os.path.join(ROOT_DIR, "fifa19_young.csv")
 
 # Kolom wajib yang tidak boleh kosong atau salah format
 REQUIRED_FIELDS = ["Name", "Age", "Club", "Position", "Overall", "Potential"]
@@ -24,7 +24,6 @@ POSITION_GROUPS = {
 
 # 3 atribut inti yang ditampilkan di profil lengkap pemain
 STAT_KEYS = ["Vision", "Reactions", "Composure"]
-
 
 class Player:
     # Record Class untuk menyimpan data satu pemain muda FIFA 19. Menyimpan atribut identitas, teknis, potensi, dan nilai finansial.
@@ -56,8 +55,11 @@ class Player:
             except (ValueError, TypeError):
                 self.stats[key] = 0
 
-        # Nilai Turunan: Growth dihitung dengan operator pengurangan '-'
+        # Nilai Turunan 1: Growth dihitung dengan operator pengurangan '-'
         self.growth: int = self.potential - self.overall
+
+        # Nilai Turunan 2: Gaji tahunan dihitung dengan operator perkalian '*' (52 minggu)
+        self.yearly_wage: float = self.wage_num * 52
 
         # Pengelompokan posisi dihitung saat objek dibuat
         self.position_group: str = "OTHER"

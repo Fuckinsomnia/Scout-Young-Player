@@ -1,7 +1,7 @@
 import csv
 
 INPUT_CSV = "data/fifa19.csv"
-OUTPUT_CSV = "data/fifa19_young.csv"
+OUTPUT_CSV = "fifa19_young.csv"
 
 # 13 kolom yang dipakai program scouting
 TARGET_COLUMNS = [

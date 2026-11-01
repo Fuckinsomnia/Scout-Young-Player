@@ -1,6 +1,32 @@
 from clean_text import parse_currency, format_currency, ask_optional_int
 from cari_nama import select_from_results
-from data import Player
+from data import Player, POSITION_GROUPS
+
+# Semua input posisi yang valid: gabungan kode grup + kode posisi spesifik
+VALID_POSITIONS = set(POSITION_GROUPS) | {p for positions in POSITION_GROUPS.values() for p in positions}
+
+
+def ask_position():
+    # Meminta posisi dengan validasi: kode posisi (ST, CB, GK), grup (FWD, MID, DEF, GK), ALL, atau 0/Enter untuk skip.
+    while True:
+        raw = input("Posisi (ST/CB/GK atau grup FWD/MID/DEF/GK, ALL = semua, 0 = skip): ").strip()
+        if not raw or raw == "0" or raw.upper() == "ALL":
+            return None
+        if raw.upper() in VALID_POSITIONS:
+            return raw.upper()
+        print("  [!] Posisi tidak dikenali. Gunakan kode posisi (ST, CB, GK), grup (FWD, MID, DEF, GK), atau ALL/0 untuk semua.")
+
+
+def ask_budget():
+    # Meminta budget gaji mingguan dengan validasi rentang data (0/Enter = skip).
+    while True:
+        raw = input("Budget gaji per minggu Anda (€1K - €155K, 0 = skip): ").strip()
+        if not raw or raw == "0":
+            return None
+        val = parse_currency(raw)
+        if 1000 <= val <= 155000:
+            return val
+        print("  [!] Budget harus di antara €1K (pemain termurah) dan €155K (pemain termahal), contoh: 50K atau 50000.")
 
 
 # 1. Algoritma Sorting Manual (Selection Sort)
@@ -65,15 +91,8 @@ def menu_filter_combined(db) -> list[Player]:
     min_overall = ask_optional_int("Overall rating minimal (40-90) (0 = untuk skip): ", 40, 90)
     max_potential = ask_optional_int("Potensi rating maksimal (75-95) (0 = untuk skip): ", 75, 95)
 
-    position_query = input("Posisi (ST/CB/GK atau grup FWD/MID/DEF/GK, ALL = semua): ").strip()
-    if not position_query or position_query == "0" or position_query.upper() == "ALL":
-        position_query = None
-
-    budget_raw = input("Budget gaji per minggu Anda (€1K - €155K): ").strip()
-    max_wage = parse_currency(budget_raw) if budget_raw and budget_raw != "0" else None
-    if max_wage is not None and not 1000 <= max_wage <= 155000:
-        print("  [!] Budget harus di antara €1K (pemain termurah) dan €155K (pemain termahal).")
-        max_wage = None
+    position_query = ask_position()
+    max_wage = ask_budget()
 
     kriteria = []
     if min_age is not None or max_age is not None:

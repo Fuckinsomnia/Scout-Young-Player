@@ -15,12 +15,13 @@ from data import load_dataset, DEFAULT_CSV_FILE
 from clean_text import ask_int
 from cari_nama import search_by_name, select_from_results
 from filter_pemain import run_filter_feature
-from komparasi import run_comparison_feature
+from komparasi import run_comparison_feature, remove_from_slot
 
 
 def main():
     print("=== FIFA 19 SCOUT PLAYER ===")
-    db, _ = load_dataset(DEFAULT_CSV_FILE)
+    db, skipped = load_dataset(DEFAULT_CSV_FILE)
+    print(f"Data Berhasil Dimuat: {len(db)} pemain | Baris Dilewati: {skipped}")
 
     slot_compare = []
 
@@ -30,9 +31,10 @@ def main():
         print("  1. Cari Berdasarkan Nama")
         print("  2. Filter Pemain (Umur, Rating, Posisi, Gaji)")
         print("  3. Komparasi pemain yg di pilih")
+        print("  4. Hapus Pemain dari Slot Komparasi")
         print("  0. Keluar")
 
-        opt = ask_int("Pilih menu (0-3): ", 0, 3)
+        opt = ask_int("Pilih menu (0-4): ", 0, 4)
 
         if opt == 1:
             q = input("\nMasukkan nama pemain: ").strip()
@@ -44,6 +46,9 @@ def main():
 
         elif opt == 3:
             run_comparison_feature(slot_compare)
+
+        elif opt == 4:
+            remove_from_slot(slot_compare)
 
         elif opt == 0:
             print("\nTerima kasih telah menggunakan Scout Player. Sampai jumpa!")

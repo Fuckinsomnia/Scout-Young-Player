@@ -1,4 +1,4 @@
-from clean_text import clean_text, ask_int
+from clean_text import clean_text, ask_int, format_currency
 from data import Player
 
 
@@ -31,7 +31,7 @@ def print_detail_card(p: Player):
     print(f"  Overall        : {p.overall}")
     print(f"  Potensi        : {p.potential} (Pertumbuhan: +{p.growth})")
     print(f"  Value          : {p.value_str}")
-    print(f"  Gaji           : {p.wage_str}/minggu")
+    print(f"  Gaji           : {p.wage_str}/minggu (setahun: {format_currency(p.yearly_wage)})")
     print(f"  Release Clause : {p.release_clause_str}")
     print("  Atribut Inti:")
     for k, v in p.stats.items():
