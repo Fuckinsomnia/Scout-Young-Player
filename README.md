@@ -168,4 +168,4 @@ Konsep **string manipulation** juga terpakai di `clean_text` (`.strip()`, `.lowe
 
 ## 8. Video Penjelasan
 
-Link video: https://youtu.be/xxxxxxxxxxx *(tautan YouTube, visibility Unlisted/Public — akan diisi segera setelah upload)*
+Link video: https://youtu.be/wYBaJNNYZEg?si=J02qngd4KmsNHU8T
