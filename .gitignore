@@ -33,4 +33,12 @@ desktop.ini
 
 # File pribadi / bukan bagian pengumpulan
 catatan_final_exam.md
+naskah_video.md
+ceklist_final_exam.md
 Final Exam (2).pdf
+
+# Video rekaman (sangat besar, diupload ke YouTube, bukan ke repo)
+*.mp4
+*.mov
+*.mkv
+*.avi
